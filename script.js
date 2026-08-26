@@ -1,4 +1,5 @@
-const API = "/api/data";
+const API =
+    "/api/data";
 
 
 
@@ -86,7 +87,7 @@ async function saveData(data) {
 
 
 // ========================================
-// HIỂN THỊ
+// HIỂN THỊ DANH SÁCH
 // ========================================
 
 async function render() {
@@ -97,22 +98,24 @@ async function render() {
         );
 
 
+    list.innerHTML =
+        "<p>Đang tải...</p>";
+
+
     try {
 
         const data =
             await getData();
 
 
-        list.innerHTML = "";
+        list.innerHTML =
+            "";
 
 
-        if (data.length === 0) {
+        if (!data.length) {
 
-            list.innerHTML = `
-                <p>
-                    Chưa có lời chúc nào.
-                </p>
-            `;
+            list.innerHTML =
+                "<p>Chưa có dữ liệu.</p>";
 
             return;
 
@@ -136,27 +139,29 @@ async function render() {
 
                     <div class="date">
                         ${escapeHTML(
-                            String(item.date)
+                            String(
+                                item.date
+                            )
                         )}
                     </div>
-
 
                     <div class="name">
                         ${escapeHTML(
-                            String(item.name)
+                            String(
+                                item.name
+                            )
                         )}
                     </div>
-
 
                     <div class="message">
                         ${escapeHTML(
-                            String(item.message)
+                            String(
+                                item.message
+                            )
                         )}
                     </div>
 
-
                     <button
-                        class="edit"
                         onclick="
                             editMessage(${index})
                         "
@@ -164,9 +169,7 @@ async function render() {
                         Sửa
                     </button>
 
-
                     <button
-                        class="delete"
                         onclick="
                             deleteMessage(${index})
                         "
@@ -189,6 +192,7 @@ async function render() {
 
             <p style="color:red">
 
+                Lỗi:
                 ${escapeHTML(
                     error.message
                 )}
@@ -254,7 +258,6 @@ async function addMessage() {
         const item = {
 
             date:
-
                 now.toLocaleTimeString(
                     "vi-VN"
                 )
@@ -266,11 +269,9 @@ async function addMessage() {
                 ),
 
             name:
-
                 name,
 
             message:
-
                 message
 
         };
@@ -300,6 +301,7 @@ async function addMessage() {
     } catch (error) {
 
         alert(
+            "Lỗi: " +
             error.message
         );
 
@@ -334,7 +336,7 @@ async function editMessage(index) {
 
         const name =
             prompt(
-                "Tên người gửi:",
+                "Tên:",
                 item.name
             );
 
@@ -348,7 +350,7 @@ async function editMessage(index) {
 
         const message =
             prompt(
-                "Nội dung:",
+                "Lời chúc:",
                 item.message
             );
 
@@ -360,12 +362,17 @@ async function editMessage(index) {
         }
 
 
-        data[index].name =
-            name;
+        data[index] = {
 
+            ...item,
 
-        data[index].message =
-            message;
+            name:
+                name,
+
+            message:
+                message
+
+        };
 
 
         await saveData(data);
@@ -382,6 +389,7 @@ async function editMessage(index) {
     } catch (error) {
 
         alert(
+            "Lỗi: " +
             error.message
         );
 
@@ -434,6 +442,7 @@ async function deleteMessage(index) {
     } catch (error) {
 
         alert(
+            "Lỗi: " +
             error.message
         );
 
@@ -444,7 +453,7 @@ async function deleteMessage(index) {
 
 
 // ========================================
-// ESCAPE HTML
+// CHỐNG HTML INJECTION
 // ========================================
 
 function escapeHTML(value) {
@@ -481,7 +490,7 @@ function escapeHTML(value) {
 
 
 // ========================================
-// CHẠY KHI MỞ WEBSITE
+// CHẠY
 // ========================================
 
 render();

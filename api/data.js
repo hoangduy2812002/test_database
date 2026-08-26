@@ -1,33 +1,140 @@
-import { put, list } from "@vercel/blob";
+import {
+    put,
+    list
+} from "@vercel/blob";
 
-const FILE_NAME = "wedding-messages.json";
+
+const FILE_NAME =
+    "wedding-messages.json";
 
 
 // ========================================
-// LẤY DATA HIỆN TẠI
+// TÌM FILE TRONG BLOB
 // ========================================
 
-async function getCurrentData() {
+async function findFile() {
 
     const result = await list({
-        prefix: FILE_NAME,
-        storeId: process.env.BLOB_STORE_ID
+        prefix: FILE_NAME
     });
 
-    if (!result.blobs.length) {
+
+    const blobs =
+        result?.blobs || [];
+
+
+    const file =
+        blobs.find(
+            blob =>
+                blob.pathname === FILE_NAME
+        );
+
+
+    return file;
+
+}
+
+
+
+// ========================================
+// ĐỌC DATA
+// ========================================
+
+async function getData() {
+
+    const file =
+        await findFile();
+
+
+    // Chưa có file
+    if (!file) {
+
         return [];
+
     }
 
-    const blob = result.blobs.find(
-        item => item.pathname === FILE_NAME
-    );
 
-    if (!blob) {
-        return [];
+    const response =
+        await fetch(
+            file.downloadUrl
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            `Không thể đọc Blob: HTTP ${response.status}`
+        );
+
     }
 
-    // Private blob cần được đọc bằng authenticated
-    // Blob SDK/API, không fetch blob.url trực tiếp.
+
+    const data =
+        await response.json();
+
+
+    if (!Array.isArray(data)) {
+
+        throw new Error(
+            "Dữ liệu Blob phải là một array"
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+
+// ========================================
+// GHI DATA
+// ========================================
+
+async function saveData(data) {
+
+    if (!Array.isArray(data)) {
+
+        throw new Error(
+            "Data phải là array"
+        );
+
+    }
+
+
+    const blob =
+        await put(
+
+            FILE_NAME,
+
+            JSON.stringify(
+                data,
+                null,
+                2
+            ),
+
+            {
+
+                access:
+                    "private",
+
+                contentType:
+                    "application/json",
+
+                addRandomSuffix:
+                    false,
+
+                allowOverwrite:
+                    true
+
+            }
+
+        );
+
+
+    return blob;
+
 }
 
 
@@ -36,23 +143,28 @@ async function getCurrentData() {
 // API
 // ========================================
 
-export default async function handler(req, res) {
+export default async function handler(
+    req,
+    res
+) {
 
     try {
 
-        // ================================
+
+        // =================================
         // GET
-        // ================================
+        // =================================
 
         if (req.method === "GET") {
 
             const data =
-                await getCurrentData();
+                await getData();
 
 
             return res.status(200).json({
 
-                success: true,
+                success:
+                    true,
 
                 data
 
@@ -62,9 +174,9 @@ export default async function handler(req, res) {
 
 
 
-        // ================================
+        // =================================
         // PUT
-        // ================================
+        // =================================
 
         if (req.method === "PUT") {
 
@@ -76,7 +188,8 @@ export default async function handler(req, res) {
 
                 return res.status(400).json({
 
-                    success: false,
+                    success:
+                        false,
 
                     message:
                         "Data phải là array"
@@ -86,45 +199,15 @@ export default async function handler(req, res) {
             }
 
 
-            const blob = await put(
-
-                FILE_NAME,
-
-                JSON.stringify(
-                    data,
-                    null,
-                    2
-                ),
-
-                {
-
-                    access:
-                        "public",
-
-                    contentType:
-                        "application/json",
-
-                    addRandomSuffix:
-                        false,
-
-                    allowOverwrite:
-                        true,
-
-                    storeId:
-                        process.env.BLOB_STORE_ID
-
-                }
-
-            );
+            await saveData(data);
 
 
             return res.status(200).json({
 
-                success: true,
+                success:
+                    true,
 
-                data,
-
-                url: blob.url
+                data
 
             });
 
@@ -132,9 +215,14 @@ export default async function handler(req, res) {
 
 
 
+        // =================================
+        // METHOD KHÔNG HỖ TRỢ
+        // =================================
+
         return res.status(405).json({
 
-            success: false,
+            success:
+                false,
 
             message:
                 "Method không được hỗ trợ"
@@ -152,7 +240,8 @@ export default async function handler(req, res) {
 
         return res.status(500).json({
 
-            success: false,
+            success:
+                false,
 
             message:
                 error.message
