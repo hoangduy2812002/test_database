@@ -1,21 +1,42 @@
-import {
-    put,
-    list
-} from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
+const FILE_NAME = "wedding-messages.json";
 
-const FILE_NAME =
-    "wedding-messages.json";
+const STORE_ID = process.env.BLOB_STORE_ID;
 
 
 // ========================================
-// TÌM FILE TRONG BLOB
+// KIỂM TRA STORE
+// ========================================
+
+function checkStore() {
+
+    if (!STORE_ID) {
+
+        throw new Error(
+            "BLOB_STORE_ID chưa được cấu hình"
+        );
+
+    }
+
+}
+
+
+// ========================================
+// TÌM FILE
 // ========================================
 
 async function findFile() {
 
+    checkStore();
+
+
     const result = await list({
-        prefix: FILE_NAME
+
+        prefix: FILE_NAME,
+
+        storeId: STORE_ID
+
     });
 
 
@@ -23,17 +44,12 @@ async function findFile() {
         result?.blobs || [];
 
 
-    const file =
-        blobs.find(
-            blob =>
-                blob.pathname === FILE_NAME
-        );
-
-
-    return file;
+    return blobs.find(
+        blob =>
+            blob.pathname === FILE_NAME
+    );
 
 }
-
 
 
 // ========================================
@@ -46,7 +62,6 @@ async function getData() {
         await findFile();
 
 
-    // Chưa có file
     if (!file) {
 
         return [];
@@ -63,7 +78,7 @@ async function getData() {
     if (!response.ok) {
 
         throw new Error(
-            `Không thể đọc Blob: HTTP ${response.status}`
+            `Không thể đọc Blob: ${response.status}`
         );
 
     }
@@ -76,7 +91,7 @@ async function getData() {
     if (!Array.isArray(data)) {
 
         throw new Error(
-            "Dữ liệu Blob phải là một array"
+            "Dữ liệu Blob không phải array"
         );
 
     }
@@ -87,20 +102,13 @@ async function getData() {
 }
 
 
-
 // ========================================
 // GHI DATA
 // ========================================
 
 async function saveData(data) {
 
-    if (!Array.isArray(data)) {
-
-        throw new Error(
-            "Data phải là array"
-        );
-
-    }
+    checkStore();
 
 
     const blob =
@@ -126,7 +134,10 @@ async function saveData(data) {
                     false,
 
                 allowOverwrite:
-                    true
+                    true,
+
+                storeId:
+                    STORE_ID
 
             }
 
@@ -136,7 +147,6 @@ async function saveData(data) {
     return blob;
 
 }
-
 
 
 // ========================================
@@ -151,9 +161,9 @@ export default async function handler(
     try {
 
 
-        // =================================
+        // ================================
         // GET
-        // =================================
+        // ================================
 
         if (req.method === "GET") {
 
@@ -174,9 +184,9 @@ export default async function handler(
 
 
 
-        // =================================
+        // ================================
         // PUT
-        // =================================
+        // ================================
 
         if (req.method === "PUT") {
 
@@ -214,10 +224,6 @@ export default async function handler(
         }
 
 
-
-        // =================================
-        // METHOD KHÔNG HỖ TRỢ
-        // =================================
 
         return res.status(405).json({
 
