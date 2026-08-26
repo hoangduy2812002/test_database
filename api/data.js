@@ -14,32 +14,20 @@ async function getCurrentData() {
         storeId: process.env.BLOB_STORE_ID
     });
 
-
     if (!result.blobs.length) {
-
         return [];
-
     }
 
+    const blob = result.blobs.find(
+        item => item.pathname === FILE_NAME
+    );
 
-    const blob = result.blobs[0];
-
-
-    const response =
-        await fetch(blob.url);
-
-
-    if (!response.ok) {
-
-        throw new Error(
-            "Không thể đọc dữ liệu Blob"
-        );
-
+    if (!blob) {
+        return [];
     }
 
-
-    return await response.json();
-
+    // Private blob cần được đọc bằng authenticated
+    // Blob SDK/API, không fetch blob.url trực tiếp.
 }
 
 
