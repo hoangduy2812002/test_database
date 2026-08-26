@@ -99,7 +99,7 @@ export default async function handler(req, res) {
                 {
 
                     access:
-                        "private",
+                        "public",
 
                     contentType:
                         "application/json",
