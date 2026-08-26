@@ -1,8 +1,17 @@
-import { put, list } from "@vercel/blob";
+import {
+    put,
+    list,
+    get
+} from "@vercel/blob";
 
-const FILE_NAME = "wedding-messages.json";
 
-const STORE_ID = process.env.BLOB_STORE_ID;
+const FILE_NAME =
+    "wedding-messages.json";
+
+
+const STORE_ID =
+    process.env.BLOB_STORE_ID;
+
 
 
 // ========================================
@@ -22,6 +31,7 @@ function checkStore() {
 }
 
 
+
 // ========================================
 // TÌM FILE
 // ========================================
@@ -31,13 +41,16 @@ async function findFile() {
     checkStore();
 
 
-    const result = await list({
+    const result =
+        await list({
 
-        prefix: FILE_NAME,
+            prefix:
+                FILE_NAME,
 
-        storeId: STORE_ID
+            storeId:
+                STORE_ID
 
-    });
+        });
 
 
     const blobs =
@@ -50,6 +63,7 @@ async function findFile() {
     );
 
 }
+
 
 
 // ========================================
@@ -69,23 +83,83 @@ async function getData() {
     }
 
 
-    const response =
-        await fetch(
-            file.downloadUrl
+    /*
+     * Private Blob:
+     * Không fetch file.downloadUrl
+     * trực tiếp.
+     */
+
+    const result =
+        await get(
+
+            FILE_NAME,
+
+            {
+
+                access:
+                    "private",
+
+                storeId:
+                    STORE_ID
+
+            }
+
         );
 
 
-    if (!response.ok) {
+    if (!result) {
 
-        throw new Error(
-            `Không thể đọc Blob: ${response.status}`
-        );
+        return [];
 
     }
 
 
+    const text =
+        await result.stream
+            .getReader();
+
+
+    const decoder =
+        new TextDecoder();
+
+
+    let content = "";
+
+
+    while (true) {
+
+        const {
+            done,
+            value
+        } =
+            await text.read();
+
+
+        if (done) {
+
+            break;
+
+        }
+
+
+        content +=
+            decoder.decode(
+                value,
+                {
+                    stream:
+                        true
+                }
+            );
+
+    }
+
+
+    content +=
+        decoder.decode();
+
+
     const data =
-        await response.json();
+        JSON.parse(content);
 
 
     if (!Array.isArray(data)) {
@@ -102,6 +176,7 @@ async function getData() {
 }
 
 
+
 // ========================================
 // GHI DATA
 // ========================================
@@ -111,42 +186,39 @@ async function saveData(data) {
     checkStore();
 
 
-    const blob =
-        await put(
+    await put(
 
-            FILE_NAME,
+        FILE_NAME,
 
-            JSON.stringify(
-                data,
-                null,
-                2
-            ),
+        JSON.stringify(
+            data,
+            null,
+            2
+        ),
 
-            {
+        {
 
-                access:
-                    "private",
+            access:
+                "private",
 
-                contentType:
-                    "application/json",
+            contentType:
+                "application/json",
 
-                addRandomSuffix:
-                    false,
+            addRandomSuffix:
+                false,
 
-                allowOverwrite:
-                    true,
+            allowOverwrite:
+                true,
 
-                storeId:
-                    STORE_ID
+            storeId:
+                STORE_ID
 
-            }
+        }
 
-        );
-
-
-    return blob;
+    );
 
 }
+
 
 
 // ========================================
@@ -161,9 +233,9 @@ export default async function handler(
     try {
 
 
-        // ================================
+        // =================================
         // GET
-        // ================================
+        // =================================
 
         if (req.method === "GET") {
 
@@ -184,9 +256,9 @@ export default async function handler(
 
 
 
-        // ================================
+        // =================================
         // PUT
-        // ================================
+        // =================================
 
         if (req.method === "PUT") {
 
