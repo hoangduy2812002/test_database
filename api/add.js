@@ -9,6 +9,15 @@ export default async function handler(req, res) {
             });
         }
 
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+
+        if (!token) {
+            return res.status(500).json({
+                success: false,
+                message: "Thiếu BLOB_READ_WRITE_TOKEN"
+            });
+        }
+
         const { name, data } = req.body || {};
 
         if (!name) {
@@ -30,7 +39,8 @@ export default async function handler(req, res) {
             JSON.stringify(data, null, 2),
             {
                 access: "private",
-                contentType: "application/json"
+                contentType: "application/json",
+                token: token
             }
         );
 
@@ -41,7 +51,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Blob add error:", error);
 
         return res.status(500).json({
             success: false,

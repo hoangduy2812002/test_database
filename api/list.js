@@ -9,7 +9,18 @@ export default async function handler(req, res) {
             });
         }
 
-        const result = await list();
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+
+        if (!token) {
+            return res.status(500).json({
+                success: false,
+                message: "Thiếu BLOB_READ_WRITE_TOKEN"
+            });
+        }
+
+        const result = await list({
+            token: token
+        });
 
         return res.status(200).json({
             success: true,
@@ -17,7 +28,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Blob list error:", error);
 
         return res.status(500).json({
             success: false,
