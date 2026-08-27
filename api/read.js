@@ -5,45 +5,58 @@ export default async function handler(req, res) {
     try {
 
         if (req.method !== "GET") {
+
             return res.status(405).json({
                 success: false,
                 message: "Method không được hỗ trợ"
             });
+
         }
 
 
-        const name = req.query.name;
+        const name =
+            req.query.name;
 
 
         if (!name) {
+
             return res.status(400).json({
                 success: false,
                 message: "Thiếu tên file"
             });
+
         }
 
 
-        const result = await list();
+        const result =
+            await list();
 
 
-        const blob = result.blobs.find(
-            item => item.pathname === name
-        );
+        const blob =
+            result.blobs.find(
+                item =>
+                    item.pathname === name
+            );
 
 
         if (!blob) {
 
             return res.status(404).json({
+
                 success: false,
-                message: "Không tìm thấy file"
+
+                message:
+                    "Không tìm thấy dữ liệu"
+
             });
 
         }
 
 
-        const response = await fetch(
-            blob.downloadUrl
-        );
+        const response =
+            await fetch(
+                blob.downloadUrl
+            );
 
 
         if (!response.ok) {
@@ -60,20 +73,30 @@ export default async function handler(req, res) {
 
 
         return res.status(200).json({
+
             success: true,
-            data
+
+            data: data
+
         });
 
 
     } catch (error) {
 
-        console.error("READ ERROR:", error);
+        console.error(
+            "READ ERROR:",
+            error
+        );
+
 
         return res.status(500).json({
+
             success: false,
-            message: error.message
+
+            message:
+                error.message
+
         });
 
     }
-
 }

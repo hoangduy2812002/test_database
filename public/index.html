@@ -1,8 +1,8 @@
+```html
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,15 +10,12 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Vercel Blob</title>
-
+    <title>Danh sách lời chúc</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
-
 
         body {
             margin: 0;
@@ -29,17 +26,14 @@
             background: #f5f5f5;
         }
 
-
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
 
             margin: auto;
         }
 
-
         .box {
-
             background: white;
 
             padding: 20px;
@@ -53,30 +47,24 @@
                 rgba(0, 0, 0, 0.08);
         }
 
-
         h1 {
             margin-top: 0;
         }
-
 
         h2 {
             margin-top: 0;
         }
 
-
         label {
-
             display: block;
 
-            margin-bottom: 6px;
+            margin-bottom: 7px;
 
             font-weight: bold;
         }
 
-
         input,
         textarea {
-
             width: 100%;
 
             padding: 12px;
@@ -90,26 +78,20 @@
             font-size: 15px;
         }
 
-
         textarea {
-
-            height: 200px;
+            height: 150px;
 
             resize: vertical;
-
-            font-family: monospace;
         }
 
-
         button {
-
             padding: 11px 18px;
 
-            border: 0;
+            border: none;
 
             border-radius: 6px;
 
-            background: black;
+            background: #000;
 
             color: white;
 
@@ -118,13 +100,12 @@
             font-size: 15px;
         }
 
-
         button:hover {
             opacity: 0.8;
         }
 
-
         #status {
+            display: none;
 
             margin-top: 15px;
 
@@ -133,13 +114,9 @@
             background: #eee;
 
             border-radius: 6px;
-
-            display: none;
         }
 
-
         .item {
-
             padding: 15px;
 
             margin-top: 10px;
@@ -151,561 +128,113 @@
             background: #fafafa;
         }
 
-
-        .item-name {
-
+        .name {
             font-weight: bold;
 
+            font-size: 17px;
+
             margin-bottom: 8px;
-
-            word-break: break-all;
         }
 
-
-        .item-info {
-
-            color: #666;
-
-            font-size: 13px;
-
-            margin-bottom: 10px;
-        }
-
-
-        .item button {
-
-            margin-right: 5px;
-
-            background: #333;
-        }
-
-
-        pre {
-
-            background: #111;
-
-            color: #fff;
-
-            padding: 15px;
-
-            border-radius: 6px;
-
-            overflow: auto;
+        .message {
+            color: #555;
 
             white-space: pre-wrap;
+
+            line-height: 1.5;
         }
 
+        .empty {
+            padding: 20px;
+
+            text-align: center;
+
+            color: #777;
+        }
     </style>
-
 </head>
-
 
 <body>
 
+    <div class="container">
 
-<div class="container">
-
-
-    <h1>Vercel Blob Manager</h1>
-
-
-    <!-- ========================= -->
-    <!-- THÊM JSON -->
-    <!-- ========================= -->
-
-    <div class="box">
-
-        <h2>Thêm dữ liệu</h2>
+        <h1>
+            Quản lý lời chúc
+        </h1>
 
 
-        <label>
-            Tên file
-        </label>
+        <!-- ========================= -->
+        <!-- THÊM LỜI CHÚC -->
+        <!-- ========================= -->
+
+        <div class="box">
+
+            <h2>
+                Thêm lời chúc
+            </h2>
 
 
-        <input
-            id="fileName"
-            type="text"
-            value="data.json"
-            placeholder="data.json"
-        >
+            <label for="name">
+                Tên
+            </label>
+
+            <input
+                id="name"
+                type="text"
+                placeholder="Nhập tên"
+            >
 
 
-        <label>
-            Dữ liệu JSON
-        </label>
+            <label for="message">
+                Lời chúc
+            </label>
+
+            <textarea
+                id="message"
+                placeholder="Nhập lời chúc..."
+            ></textarea>
 
 
-        <textarea
-            id="jsonData"
-        >{
-    "name": "Hoàng Duy",
-    "message": "Xin chào",
-    "number": 123
-}</textarea>
+            <button id="addButton">
+                Thêm lời chúc
+            </button>
 
 
-        <button onclick="addData()">
-            Thêm vào Blob
-        </button>
+            <div id="status"></div>
+
+        </div>
 
 
-        <div id="status"></div>
+        <!-- ========================= -->
+        <!-- DANH SÁCH -->
+        <!-- ========================= -->
 
-    </div>
+        <div class="box">
 
-
-    <!-- ========================= -->
-    <!-- DANH SÁCH -->
-    <!-- ========================= -->
-
-    <div class="box">
-
-        <h2>
-            Danh sách Blob
-        </h2>
+            <h2>
+                Danh sách lời chúc
+            </h2>
 
 
-        <button onclick="loadList()">
-            Tải lại
-        </button>
+            <button id="reloadButton">
+                Tải lại
+            </button>
 
 
-        <div id="list">
+            <div id="list">
 
-            Đang tải...
+                Đang tải...
+
+            </div>
 
         </div>
 
     </div>
 
 
-    <!-- ========================= -->
-    <!-- XEM JSON -->
-    <!-- ========================= -->
-
-    <div
-        class="box"
-        id="viewBox"
-        style="display:none"
-    >
-
-        <h2>
-            Nội dung
-        </h2>
-
-
-        <pre id="content"></pre>
-
-    </div>
-
-
-</div>
-
-
-<script>
-
-
-// =================================
-// STATUS
-// =================================
-
-function showStatus(message) {
-
-    const element =
-        document.getElementById("status");
-
-
-    element.style.display = "block";
-
-    element.textContent = message;
-}
-
-
-
-// =================================
-// THÊM DATA
-// =================================
-
-async function addData() {
-
-    const name =
-        document
-            .getElementById("fileName")
-            .value
-            .trim();
-
-
-    const jsonText =
-        document
-            .getElementById("jsonData")
-            .value
-            .trim();
-
-
-    if (!name) {
-
-        alert("Vui lòng nhập tên file");
-
-        return;
-    }
-
-
-    let data;
-
-
-    try {
-
-        data =
-            JSON.parse(jsonText);
-
-    } catch (error) {
-
-        alert("JSON không hợp lệ");
-
-        return;
-    }
-
-
-    showStatus(
-        "Đang thêm dữ liệu..."
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/add",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        name,
-                        data
-                    })
-                }
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.message
-            );
-
-        }
-
-
-        showStatus(
-            "Thêm dữ liệu thành công!"
-        );
-
-
-        loadList();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        showStatus(
-            "Lỗi: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-
-// =================================
-// LẤY DANH SÁCH
-// =================================
-
-async function loadList() {
-
-    const list =
-        document.getElementById("list");
-
-
-    list.innerHTML =
-        "Đang tải...";
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/list"
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.message
-            );
-
-        }
-
-
-        const blobs =
-            result.blobs || [];
-
-
-        if (blobs.length === 0) {
-
-            list.innerHTML =
-                "Chưa có dữ liệu.";
-
-            return;
-        }
-
-
-        list.innerHTML = "";
-
-
-        blobs.forEach(
-            blob => {
-
-                const item =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                item.className =
-                    "item";
-
-
-                item.innerHTML = `
-
-                    <div class="item-name">
-                        ${escapeHtml(
-                            blob.pathname
-                        )}
-                    </div>
-
-                    <div class="item-info">
-                        Size:
-                        ${formatBytes(
-                            blob.size
-                        )}
-                    </div>
-
-                    <div class="item-info">
-                        ${new Date(
-                            blob.uploadedAt
-                        ).toLocaleString(
-                            "vi-VN"
-                        )}
-                    </div>
-
-                    <button
-                        onclick="readData(
-                            '${encodeURIComponent(
-                                blob.pathname
-                            )}'
-                        )"
-                    >
-                        Xem
-                    </button>
-
-                `;
-
-
-                list.appendChild(item);
-
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        list.innerHTML =
-            "Lỗi: " +
-            escapeHtml(
-                error.message
-            );
-
-    }
-
-}
-
-
-
-// =================================
-// ĐỌC JSON
-// =================================
-
-async function readData(name) {
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/read?name=" +
-                name
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.message
-            );
-
-        }
-
-
-        document
-            .getElementById("viewBox")
-            .style.display = "block";
-
-
-        document
-            .getElementById("content")
-            .textContent =
-                JSON.stringify(
-                    result.data,
-                    null,
-                    4
-                );
-
-
-        document
-            .getElementById("viewBox")
-            .scrollIntoView({
-                behavior: "smooth"
-            });
-
-
-    } catch (error) {
-
-        alert(
-            "Lỗi: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-
-// =================================
-// FORMAT SIZE
-// =================================
-
-function formatBytes(bytes) {
-
-    if (!bytes) {
-        return "0 Bytes";
-    }
-
-
-    const units = [
-        "Bytes",
-        "KB",
-        "MB",
-        "GB"
-    ];
-
-
-    const index =
-        Math.floor(
-            Math.log(bytes) /
-            Math.log(1024)
-        );
-
-
-    return (
-        parseFloat(
-            (
-                bytes /
-                Math.pow(
-                    1024,
-                    index
-                )
-            ).toFixed(2)
-        )
-        +
-        " " +
-        units[index]
-    );
-
-}
-
-
-
-// =================================
-// ESCAPE HTML
-// =================================
-
-function escapeHtml(value) {
-
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
-
-// =================================
-// LOAD KHI MỞ TRANG
-// =================================
-
-loadList();
-
-
-</script>
-
+    <script src="/script.js"></script>
 
 </body>
 
 </html>
+```
