@@ -14,15 +14,27 @@ const messageInput =
     );
 
 
-const addButton =
+const saveButton =
     document.getElementById(
-        "addButton"
+        "saveButton"
+    );
+
+
+const cancelButton =
+    document.getElementById(
+        "cancelButton"
     );
 
 
 const reloadButton =
     document.getElementById(
         "reloadButton"
+    );
+
+
+const formTitle =
+    document.getElementById(
+        "formTitle"
     );
 
 
@@ -39,24 +51,34 @@ const listElement =
 
 
 // ========================================
-// STATUS
+// BIẾN SỬA
+// ========================================
+
+// null = đang thêm
+// messages/xxx.json = đang sửa
+
+let editingId = null;
+
+
+// ========================================
+// HIỂN THỊ STATUS
 // ========================================
 
 function showStatus(
-    message
+    text
 ) {
 
     statusElement.style.display =
         "block";
 
     statusElement.textContent =
-        message;
+        text;
 
 }
 
 
 // ========================================
-// LOAD DANH SÁCH
+// TẢI DANH SÁCH
 // ========================================
 
 async function loadMessages() {
@@ -81,7 +103,7 @@ async function loadMessages() {
 
             throw new Error(
                 result.message ||
-                "Không thể lấy dữ liệu"
+                "Không thể tải dữ liệu"
             );
 
         }
@@ -115,7 +137,7 @@ async function loadMessages() {
 
 
         // ------------------------------
-        // Hiển thị
+        // Hiển thị từng lời chúc
         // ------------------------------
 
         data.forEach(
@@ -131,6 +153,10 @@ async function loadMessages() {
                     "item";
 
 
+                // =========================
+                // NAME
+                // =========================
+
                 const name =
                     document.createElement(
                         "div"
@@ -144,6 +170,10 @@ async function loadMessages() {
                 name.textContent =
                     item.name;
 
+
+                // =========================
+                // MESSAGE
+                // =========================
 
                 const message =
                     document.createElement(
@@ -159,6 +189,98 @@ async function loadMessages() {
                     item.message;
 
 
+                // =========================
+                // DATE
+                // =========================
+
+                const date =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                date.className =
+                    "date";
+
+
+                if (
+                    item.createdAt
+                ) {
+
+                    date.textContent =
+                        new Date(
+                            item.createdAt
+                        ).toLocaleString(
+                            "vi-VN"
+                        );
+
+                }
+
+
+                // =========================
+                // EDIT
+                // =========================
+
+                const editButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                editButton.className =
+                    "edit-button";
+
+
+                editButton.textContent =
+                    "Sửa";
+
+
+                editButton.addEventListener(
+                    "click",
+                    () => {
+
+                        startEdit(
+                            item
+                        );
+
+                    }
+                );
+
+
+                // =========================
+                // DELETE
+                // =========================
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                deleteButton.className =
+                    "delete-button";
+
+
+                deleteButton.textContent =
+                    "Xóa";
+
+
+                deleteButton.addEventListener(
+                    "click",
+                    () => {
+
+                        deleteMessage(
+                            item.id
+                        );
+
+                    }
+                );
+
+
+                // =========================
+                // APPEND
+                // =========================
+
                 element.appendChild(
                     name
                 );
@@ -169,37 +291,19 @@ async function loadMessages() {
                 );
 
 
-                // -------------------------
-                // Ngày tạo
-                // -------------------------
-
-                if (
-                    item.createdAt
-                ) {
-
-                    const date =
-                        document.createElement(
-                            "div"
-                        );
+                element.appendChild(
+                    date
+                );
 
 
-                    date.className =
-                        "date";
+                element.appendChild(
+                    editButton
+                );
 
 
-                    date.textContent =
-                        new Date(
-                            item.createdAt
-                        ).toLocaleString(
-                            "vi-VN"
-                        );
-
-
-                    element.appendChild(
-                        date
-                    );
-
-                }
+                element.appendChild(
+                    deleteButton
+                );
 
 
                 listElement.appendChild(
@@ -218,14 +322,28 @@ async function loadMessages() {
         );
 
 
-        listElement.innerHTML = `
-            <div class="empty">
-                Lỗi:
-                ${escapeHtml(
-                    error.message
-                )}
-            </div>
-        `;
+        listElement.innerHTML =
+            "";
+
+
+        const errorElement =
+            document.createElement(
+                "div"
+            );
+
+
+        errorElement.className =
+            "empty";
+
+
+        errorElement.textContent =
+            "Lỗi: " +
+            error.message;
+
+
+        listElement.appendChild(
+            errorElement
+        );
 
     }
 
@@ -233,10 +351,105 @@ async function loadMessages() {
 
 
 // ========================================
-// THÊM
+// BẮT ĐẦU SỬA
 // ========================================
 
-async function addMessage() {
+function startEdit(
+    item
+) {
+
+    // Lưu ID Blob
+
+    editingId =
+        item.id;
+
+
+    // Đưa dữ liệu lên form
+
+    nameInput.value =
+        item.name;
+
+
+    messageInput.value =
+        item.message;
+
+
+    // Đổi giao diện
+
+    formTitle.textContent =
+        "Sửa lời chúc";
+
+
+    saveButton.textContent =
+        "Lưu thay đổi";
+
+
+    cancelButton.style.display =
+        "inline-block";
+
+
+    statusElement.style.display =
+        "none";
+
+
+    // Cuộn lên form
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior:
+            "smooth"
+
+    });
+
+
+    nameInput.focus();
+
+}
+
+
+// ========================================
+// HỦY SỬA
+// ========================================
+
+function cancelEdit() {
+
+    editingId =
+        null;
+
+
+    nameInput.value =
+        "";
+
+
+    messageInput.value =
+        "";
+
+
+    formTitle.textContent =
+        "Thêm lời chúc";
+
+
+    saveButton.textContent =
+        "Thêm lời chúc";
+
+
+    cancelButton.style.display =
+        "none";
+
+
+    statusElement.style.display =
+        "none";
+
+}
+
+
+// ========================================
+// LƯU
+// ========================================
+
+async function saveMessage() {
 
     const name =
         nameInput.value.trim();
@@ -247,7 +460,7 @@ async function addMessage() {
 
 
     // ------------------------------
-    // Kiểm tra
+    // Kiểm tra tên
     // ------------------------------
 
     if (!name) {
@@ -262,6 +475,10 @@ async function addMessage() {
 
     }
 
+
+    // ------------------------------
+    // Kiểm tra message
+    // ------------------------------
 
     if (!message) {
 
@@ -278,22 +495,90 @@ async function addMessage() {
 
     try {
 
-        addButton.disabled =
+        saveButton.disabled =
             true;
 
 
-        addButton.textContent =
-            "Đang lưu...";
+        // =================================
+        // SỬA
+        // =================================
+
+        if (editingId) {
+
+            saveButton.textContent =
+                "Đang lưu...";
 
 
-        showStatus(
-            "Đang lưu..."
-        );
+            const response =
+                await fetch(
+                    "/api/data",
+                    {
+
+                        method:
+                            "PUT",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                id:
+                                    editingId,
+
+                                name:
+                                    name,
+
+                                message:
+                                    message
+
+                            })
+
+                    }
+                );
 
 
-        // ------------------------------
-        // POST
-        // ------------------------------
+            const result =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.message ||
+                    "Không thể sửa"
+                );
+
+            }
+
+
+            alert(
+                "Sửa thành công!"
+            );
+
+
+            cancelEdit();
+
+
+            await loadMessages();
+
+
+            return;
+
+        }
+
+
+        // =================================
+        // THÊM
+        // =================================
+
+        saveButton.textContent =
+            "Đang thêm...";
+
 
         const response =
             await fetch(
@@ -339,14 +624,7 @@ async function addMessage() {
         }
 
 
-        // ------------------------------
-        // Thành công
-        // ------------------------------
-
-        showStatus(
-            "Thêm lời chúc thành công!"
-        );
-
+        // Xóa form
 
         nameInput.value =
             "";
@@ -356,9 +634,12 @@ async function addMessage() {
             "";
 
 
-        // ------------------------------
-        // Load lại
-        // ------------------------------
+        showStatus(
+            "Thêm thành công!"
+        );
+
+
+        // Tải lại danh sách
 
         await loadMessages();
 
@@ -366,7 +647,7 @@ async function addMessage() {
     } catch (error) {
 
         console.error(
-            "ADD ERROR:",
+            "SAVE ERROR:",
             error
         );
 
@@ -379,12 +660,21 @@ async function addMessage() {
 
     } finally {
 
-        addButton.disabled =
+        saveButton.disabled =
             false;
 
 
-        addButton.textContent =
-            "Thêm lời chúc";
+        if (editingId) {
+
+            saveButton.textContent =
+                "Lưu thay đổi";
+
+        } else {
+
+            saveButton.textContent =
+                "Thêm lời chúc";
+
+        }
 
     }
 
@@ -392,39 +682,104 @@ async function addMessage() {
 
 
 // ========================================
-// ESCAPE HTML
+// XÓA
 // ========================================
 
-function escapeHtml(
-    value
+async function deleteMessage(
+    id
 ) {
 
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
+    const confirmed =
+        confirm(
+            "Bạn có chắc muốn xóa lời chúc này?"
         );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/data",
+                {
+
+                    method:
+                        "DELETE",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            id:
+                                id
+
+                        })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Không thể xóa"
+            );
+
+        }
+
+
+        alert(
+            "Xóa thành công!"
+        );
+
+
+        // Nếu đang sửa item vừa xóa
+
+        if (
+            editingId === id
+        ) {
+
+            cancelEdit();
+
+        }
+
+
+        // Tải lại
+
+        await loadMessages();
+
+
+    } catch (error) {
+
+        console.error(
+            "DELETE ERROR:",
+            error
+        );
+
+
+        alert(
+            "Lỗi: " +
+            error.message
+        );
+
+    }
 
 }
 
@@ -433,9 +788,15 @@ function escapeHtml(
 // EVENT
 // ========================================
 
-addButton.addEventListener(
+saveButton.addEventListener(
     "click",
-    addMessage
+    saveMessage
+);
+
+
+cancelButton.addEventListener(
+    "click",
+    cancelEdit
 );
 
 
@@ -446,7 +807,7 @@ reloadButton.addEventListener(
 
 
 // ========================================
-// LOAD BAN ĐẦU
+// LOAD KHI MỞ TRANG
 // ========================================
 
 loadMessages();
