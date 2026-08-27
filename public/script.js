@@ -1,5 +1,5 @@
 // ========================================
-// LẤY ELEMENT
+// DOM
 // ========================================
 
 const nameInput =
@@ -39,7 +39,7 @@ const listElement =
 
 
 // ========================================
-// HIỂN THỊ STATUS
+// STATUS
 // ========================================
 
 function showStatus(
@@ -56,18 +56,15 @@ function showStatus(
 
 
 // ========================================
-// LẤY DANH SÁCH
+// LOAD DANH SÁCH
 // ========================================
 
 async function loadMessages() {
 
     try {
 
-        listElement.innerHTML = `
-            <div class="loading">
-                Đang tải...
-            </div>
-        `;
+        listElement.innerHTML =
+            "Đang tải...";
 
 
         const response =
@@ -113,16 +110,12 @@ async function loadMessages() {
         }
 
 
-        // ------------------------------
-        // Xóa danh sách cũ
-        // ------------------------------
-
         listElement.innerHTML =
             "";
 
 
         // ------------------------------
-        // Hiển thị dữ liệu
+        // Hiển thị
         // ------------------------------
 
         data.forEach(
@@ -176,6 +169,39 @@ async function loadMessages() {
                 );
 
 
+                // -------------------------
+                // Ngày tạo
+                // -------------------------
+
+                if (
+                    item.createdAt
+                ) {
+
+                    const date =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    date.className =
+                        "date";
+
+
+                    date.textContent =
+                        new Date(
+                            item.createdAt
+                        ).toLocaleString(
+                            "vi-VN"
+                        );
+
+
+                    element.appendChild(
+                        date
+                    );
+
+                }
+
+
                 listElement.appendChild(
                     element
                 );
@@ -207,7 +233,7 @@ async function loadMessages() {
 
 
 // ========================================
-// THÊM LỜI CHÚC
+// THÊM
 // ========================================
 
 async function addMessage() {
@@ -252,10 +278,6 @@ async function addMessage() {
 
     try {
 
-        // ---------------------------
-        // Khóa nút
-        // ---------------------------
-
         addButton.disabled =
             true;
 
@@ -265,13 +287,13 @@ async function addMessage() {
 
 
         showStatus(
-            "Đang lưu dữ liệu..."
+            "Đang lưu..."
         );
 
 
-        // ---------------------------
-        // Gửi API
-        // ---------------------------
+        // ------------------------------
+        // POST
+        // ------------------------------
 
         const response =
             await fetch(
@@ -307,43 +329,36 @@ async function addMessage() {
             await response.json();
 
 
-        // ---------------------------
-        // Kiểm tra kết quả
-        // ---------------------------
-
         if (!response.ok) {
 
             throw new Error(
                 result.message ||
-                "Không thể thêm dữ liệu"
+                "Không thể thêm"
             );
 
         }
 
 
-        // ---------------------------
+        // ------------------------------
         // Thành công
-        // ---------------------------
+        // ------------------------------
 
         showStatus(
             "Thêm lời chúc thành công!"
         );
 
 
-        // ---------------------------
-        // Xóa form
-        // ---------------------------
-
         nameInput.value =
             "";
+
 
         messageInput.value =
             "";
 
 
-        // ---------------------------
-        // Load lại danh sách
-        // ---------------------------
+        // ------------------------------
+        // Load lại
+        // ------------------------------
 
         await loadMessages();
 
@@ -431,7 +446,7 @@ reloadButton.addEventListener(
 
 
 // ========================================
-// LOAD KHI MỞ TRANG
+// LOAD BAN ĐẦU
 // ========================================
 
 loadMessages();

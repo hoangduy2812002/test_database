@@ -12,7 +12,7 @@
     >
 
     <title>
-        Quản lý lời chúc
+        Lời chúc
     </title>
 
 
@@ -55,11 +55,9 @@
             background:
                 white;
 
-            padding:
-                20px;
+            padding: 20px;
 
-            margin-bottom:
-                20px;
+            margin-bottom: 20px;
 
             border-radius:
                 10px;
@@ -76,13 +74,7 @@
         }
 
 
-        h1 {
-
-            margin-top: 0;
-
-        }
-
-
+        h1,
         h2 {
 
             margin-top: 0;
@@ -152,7 +144,7 @@
                 6px;
 
             background:
-                black;
+                #000;
 
             color:
                 white;
@@ -162,14 +154,6 @@
 
             cursor:
                 pointer;
-
-        }
-
-
-        button:hover {
-
-            opacity:
-                0.8;
 
         }
 
@@ -187,6 +171,9 @@
 
         #status {
 
+            display:
+                none;
+
             margin-top:
                 15px;
 
@@ -198,9 +185,6 @@
 
             background:
                 #eee;
-
-            display:
-                none;
 
         }
 
@@ -253,6 +237,20 @@
         }
 
 
+        .date {
+
+            margin-top:
+                8px;
+
+            font-size:
+                12px;
+
+            color:
+                #999;
+
+        }
+
+
         .empty {
 
             padding:
@@ -260,14 +258,6 @@
 
             text-align:
                 center;
-
-            color:
-                #777;
-
-        }
-
-
-        .loading {
 
             color:
                 #777;
@@ -285,39 +275,19 @@
 <div class="container">
 
 
-    <!-- ============================= -->
-    <!-- TIÊU ĐỀ -->
-    <!-- ============================= -->
+    <!-- ================================= -->
+    <!-- THÊM LỜI CHÚC -->
+    <!-- ================================= -->
 
     <div class="box">
 
         <h1>
-            Quản lý lời chúc
+            Gửi lời chúc
         </h1>
 
-        <p>
-            Dữ liệu được lưu trong
-            Vercel Blob.
-        </p>
 
-    </div>
-
-
-    <!-- ============================= -->
-    <!-- THÊM -->
-    <!-- ============================= -->
-
-    <div class="box">
-
-        <h2>
-            Thêm lời chúc
-        </h2>
-
-
-        <label for="name">
-
+        <label>
             Tên
-
         </label>
 
 
@@ -328,10 +298,8 @@
         >
 
 
-        <label for="message">
-
+        <label>
             Lời chúc
-
         </label>
 
 
@@ -353,9 +321,9 @@
     </div>
 
 
-    <!-- ============================= -->
+    <!-- ================================= -->
     <!-- DANH SÁCH -->
-    <!-- ============================= -->
+    <!-- ================================= -->
 
     <div class="box">
 
@@ -373,11 +341,7 @@
 
         <div id="list">
 
-            <div class="loading">
-
-                Đang tải...
-
-            </div>
+            Đang tải...
 
         </div>
 

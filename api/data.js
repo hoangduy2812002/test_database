@@ -1,110 +1,15 @@
 import {
-    get,
-    put
+    put,
+    list,
+    get
 } from "@vercel/blob";
 
 
-const FILE_NAME = "messages.json";
-
-
 // ========================================
-// ĐỌC messages.json
+// CẤU HÌNH
 // ========================================
 
-async function getData() {
-
-    try {
-
-        const result =
-            await get(
-                FILE_NAME,
-                {
-                    access: "private"
-                }
-            );
-
-
-        if (!result) {
-
-            return [];
-
-        }
-
-
-        const text =
-            await new Response(
-                result.stream
-            ).text();
-
-
-        if (!text) {
-
-            return [];
-
-        }
-
-
-        const data =
-            JSON.parse(text);
-
-
-        if (!Array.isArray(data)) {
-
-            return [];
-
-        }
-
-
-        return data;
-
-
-    } catch (error) {
-
-        console.log(
-            "Không có messages.json, tạo mới."
-        );
-
-        return [];
-
-    }
-
-}
-
-
-// ========================================
-// LƯU messages.json
-// ========================================
-
-async function saveData(data) {
-
-    const result =
-        await put(
-
-            FILE_NAME,
-
-            JSON.stringify(
-                data,
-                null,
-                4
-            ),
-
-            {
-                access: "private",
-
-                contentType:
-                    "application/json",
-
-                // Cho phép ghi đè file
-                allowOverwrite:
-                    true
-            }
-
-        );
-
-
-    return result;
-
-}
+const DIRECTORY = "messages/";
 
 
 // ========================================
@@ -120,14 +25,84 @@ export default async function handler(
 
         // =================================
         // GET
+        // LẤY DANH SÁCH
         // =================================
 
-        if (
-            req.method === "GET"
-        ) {
+        if (req.method === "GET") {
 
-            const data =
-                await getData();
+            const result =
+                await list({
+                    prefix: DIRECTORY
+                });
+
+
+            const data = [];
+
+
+            // Đọc từng Blob
+
+            for (
+                const blob
+                of result.blobs
+            ) {
+
+                try {
+
+                    const file =
+                        await get(
+                            blob.pathname,
+                            {
+                                access:
+                                    "private"
+                            }
+                        );
+
+
+                    if (!file) {
+                        continue;
+                    }
+
+
+                    const text =
+                        await new Response(
+                            file.stream
+                        ).text();
+
+
+                    const item =
+                        JSON.parse(text);
+
+
+                    data.push({
+
+                        name:
+                            item.name,
+
+                        message:
+                            item.message,
+
+                        createdAt:
+                            item.createdAt || null
+
+                    });
+
+
+                } catch (error) {
+
+                    console.error(
+                        "READ BLOB ERROR:",
+                        blob.pathname,
+                        error
+                    );
+
+                }
+
+            }
+
+
+            // Mới nhất trước
+
+            data.reverse();
 
 
             return res.status(200).json({
@@ -144,11 +119,10 @@ export default async function handler(
 
         // =================================
         // POST
+        // THÊM LỜI CHÚC
         // =================================
 
-        if (
-            req.method === "POST"
-        ) {
+        if (req.method === "POST") {
 
             const {
                 name,
@@ -200,47 +174,66 @@ export default async function handler(
 
 
             // -----------------------------
-            // Lấy dữ liệu cũ
+            // Tạo ID duy nhất
             // -----------------------------
 
-            const data =
-                await getData();
+            const id =
+                `${Date.now()}-${Math.random()
+                    .toString(36)
+                    .substring(2, 10)}`;
+
+
+            const fileName =
+                `${DIRECTORY}${id}.json`;
 
 
             // -----------------------------
-            // Thêm dữ liệu
+            // Dữ liệu
             // -----------------------------
 
-            const newData = {
+            const data = {
 
                 name:
                     name.trim(),
 
                 message:
-                    message.trim()
+                    message.trim(),
+
+                createdAt:
+                    new Date().toISOString()
 
             };
 
 
-            data.push(
-                newData
-            );
-
-
             // -----------------------------
-            // Lưu lại
+            // Tạo Blob mới
             // -----------------------------
 
-            await saveData(
-                data
-            );
+            const blob =
+                await put(
+
+                    fileName,
+
+                    JSON.stringify(
+                        data,
+                        null,
+                        4
+                    ),
+
+                    {
+
+                        access:
+                            "private",
+
+                        contentType:
+                            "application/json"
+
+                    }
+
+                );
 
 
-            // -----------------------------
-            // Trả kết quả
-            // -----------------------------
-
-            return res.status(200).json({
+            return res.status(201).json({
 
                 success: true,
 
@@ -248,10 +241,10 @@ export default async function handler(
                     "Thêm thành công",
 
                 data:
-                    newData,
+                    data,
 
-                total:
-                    data.length
+                pathname:
+                    blob.pathname
 
             });
 
@@ -275,7 +268,7 @@ export default async function handler(
     } catch (error) {
 
         console.error(
-            "API ERROR:",
+            "BLOB ERROR:",
             error
         );
 
