@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Vercel Blob Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            background: #000;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #eee;
+            display: none;
+        }
+
+        .blob {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+
+        .blob-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+
+        .blob-url {
+            font-size: 13px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .blob-size {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .empty {
+            color: #777;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Vercel Blob Manager</h1>
+
+    <!-- THÊM DỮ LIỆU -->
+    <div class="box">
+
+        <h2>Thêm dữ liệu</h2>
+
+        <label for="name">
+            Tên file
+        </label>
+
+        <input
+            id="name"
+            type="text"
+            placeholder="data.json"
+        >
+
+        <label for="data">
+            JSON
+        </label>
+
+        <textarea
+            id="data"
+            placeholder='{
+    "name": "Hoàng Duy",
+    "age": 25
+}'></textarea>
+
+        <button onclick="addBlob()">
+            Thêm vào Blob
+        </button>
+
+        <div
+            id="status"
+            class="status"
+        ></div>
+
+    </div>
+
+
+    <!-- DANH SÁCH -->
+    <div class="box">
+
+        <h2>
+            Danh sách Blob
+        </h2>
+
+        <button onclick="loadBlobs()">
+            Tải lại danh sách
+        </button>
+
+        <br>
+        <br>
+
+        <div id="blobList">
+            Đang tải...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==============================
+    // HIỂN THỊ STATUS
+    // ==============================
+
+    function showStatus(message) {
+
+        const status =
+            document.getElementById("status");
+
+        status.style.display = "block";
+
+        status.textContent = message;
+    }
+
+
+    // ==============================
+    // THÊM BLOB
+    // ==============================
+
+    async function addBlob() {
+
+        const name =
+            document.getElementById("name").value.trim();
+
+        const dataText =
+            document.getElementById("data").value.trim();
+
+        if (!name) {
+
+            alert("Vui lòng nhập tên file");
+
+            return;
+        }
+
+        if (!dataText) {
+
+            alert("Vui lòng nhập JSON");
+
+            return;
+        }
+
+
+        // Kiểm tra JSON
+
+        let data;
+
+        try {
+
+            data = JSON.parse(dataText);
+
+        } catch (error) {
+
+            alert("JSON không hợp lệ");
+
+            return;
+        }
+
+
+        showStatus("Đang thêm dữ liệu...");
+
+
+        try {
+
+            const response = await fetch(
+                "/api/add",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: name,
+                        data: data
+                    })
+                }
+            );
+
+
+            const result =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.message ||
+                    "Không thể thêm dữ liệu"
+                );
+            }
+
+
+            showStatus(
+                "Thêm dữ liệu thành công!"
+            );
+
+
+            // Xóa form
+
+            document.getElementById("name")
+                .value = "";
+
+            document.getElementById("data")
+                .value = "";
+
+
+            // Load lại danh sách
+
+            loadBlobs();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showStatus(
+                "Lỗi: " + error.message
+            );
+        }
+    }
+
+
+    // ==============================
+    // LẤY DANH SÁCH BLOB
+    // ==============================
+
+    async function loadBlobs() {
+
+        const container =
+            document.getElementById("blobList");
+
+
+        container.innerHTML =
+            "Đang tải...";
+
+
+        try {
+
+            const response =
+                await fetch("/api/list");
+
+
+            const result =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.message ||
+                    "Không thể lấy danh sách"
+                );
+            }
+
+
+            const blobs =
+                result.blobs || [];
+
+
+            if (blobs.length === 0) {
+
+                container.innerHTML = `
+                    <div class="empty">
+                        Chưa có Blob nào.
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            container.innerHTML = "";
+
+
+            blobs.forEach(blob => {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "blob";
+
+
+                div.innerHTML = `
+
+                    <div class="blob-name">
+                        ${escapeHtml(blob.pathname)}
+                    </div>
+
+                    <div class="blob-url">
+                        ${escapeHtml(blob.url)}
+                    </div>
+
+                    <div class="blob-size">
+                        Kích thước:
+                        ${formatBytes(blob.size)}
+                    </div>
+
+                    <div class="blob-size">
+                        Ngày tạo:
+                        ${new Date(blob.uploadedAt)
+                            .toLocaleString("vi-VN")}
+                    </div>
+
+                    <br>
+
+                    <a
+                        href="${blob.url}"
+                        target="_blank"
+                    >
+                        Mở Blob
+                    </a>
+
+                `;
+
+
+                container.appendChild(div);
+
+            });
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            container.innerHTML = `
+                <div class="empty">
+                    Lỗi: ${escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    }
+
+
+    // ==============================
+    // FORMAT SIZE
+    // ==============================
+
+    function formatBytes(bytes) {
+
+        if (!bytes) {
+            return "0 Bytes";
+        }
+
+        const units = [
+            "Bytes",
+            "KB",
+            "MB",
+            "GB"
+        ];
+
+        const index =
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            );
+
+
+        return (
+            parseFloat(
+                (bytes /
+                Math.pow(1024, index))
+                .toFixed(2)
+            )
+            + " "
+            + units[index]
+        );
+    }
+
+
+    // ==============================
+    // CHỐNG HTML INJECTION
+    // ==============================
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    // ==============================
+    // LOAD KHI MỞ TRANG
+    // ==============================
+
+    loadBlobs();
+
+</script>
+
+</body>
+</html>

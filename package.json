@@ -1,5 +1,8 @@
 {
-  "dependencies": {
-    "@vercel/blob": "^2.8.0"
+    "name": "vercel-blob-demo",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+      "@vercel/blob": "latest"
+    }
   }
-}
