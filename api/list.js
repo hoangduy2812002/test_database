@@ -2,14 +2,12 @@ import { list } from "@vercel/blob";
 
 export default async function handler(req, res) {
     try {
-        if (req.method !== "GET") {
-            return res.status(405).json({
-                success: false,
-                message: "Method không được hỗ trợ"
-            });
-        }
-
         const token = process.env.BLOB_READ_WRITE_TOKEN;
+
+        console.log(
+            "BLOB TOKEN:",
+            token ? "ĐÃ CÓ TOKEN" : "KHÔNG CÓ TOKEN"
+        );
 
         if (!token) {
             return res.status(500).json({
@@ -19,7 +17,7 @@ export default async function handler(req, res) {
         }
 
         const result = await list({
-            token: token
+            token
         });
 
         return res.status(200).json({
@@ -28,7 +26,8 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Blob list error:", error);
+
+        console.error(error);
 
         return res.status(500).json({
             success: false,
