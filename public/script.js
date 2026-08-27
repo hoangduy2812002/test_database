@@ -1,46 +1,208 @@
-
 // ========================================
-// CẤU HÌNH API
-// ========================================
-
-const API = {
-    LIST: "/api/list",
-    ADD: "/api/add"
-};
-
-
-// ========================================
-// DOM
+// LẤY ELEMENT
 // ========================================
 
 const nameInput =
-    document.getElementById("name");
+    document.getElementById(
+        "name"
+    );
+
 
 const messageInput =
-    document.getElementById("message");
+    document.getElementById(
+        "message"
+    );
+
 
 const addButton =
-    document.getElementById("addButton");
+    document.getElementById(
+        "addButton"
+    );
+
 
 const reloadButton =
-    document.getElementById("reloadButton");
+    document.getElementById(
+        "reloadButton"
+    );
+
 
 const statusElement =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
+
 
 const listElement =
-    document.getElementById("list");
+    document.getElementById(
+        "list"
+    );
 
 
 // ========================================
-// HIỂN THỊ THÔNG BÁO
+// HIỂN THỊ STATUS
 // ========================================
 
-function showStatus(message) {
+function showStatus(
+    message
+) {
 
-    statusElement.style.display = "block";
+    statusElement.style.display =
+        "block";
 
-    statusElement.textContent = message;
+    statusElement.textContent =
+        message;
+
+}
+
+
+// ========================================
+// LẤY DANH SÁCH
+// ========================================
+
+async function loadMessages() {
+
+    try {
+
+        listElement.innerHTML = `
+            <div class="loading">
+                Đang tải...
+            </div>
+        `;
+
+
+        const response =
+            await fetch(
+                "/api/data"
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Không thể lấy dữ liệu"
+            );
+
+        }
+
+
+        const data =
+            result.data || [];
+
+
+        // ------------------------------
+        // Không có dữ liệu
+        // ------------------------------
+
+        if (
+            data.length === 0
+        ) {
+
+            listElement.innerHTML = `
+                <div class="empty">
+                    Chưa có lời chúc nào.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        // ------------------------------
+        // Xóa danh sách cũ
+        // ------------------------------
+
+        listElement.innerHTML =
+            "";
+
+
+        // ------------------------------
+        // Hiển thị dữ liệu
+        // ------------------------------
+
+        data.forEach(
+            item => {
+
+                const element =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                element.className =
+                    "item";
+
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                name.className =
+                    "name";
+
+
+                name.textContent =
+                    item.name;
+
+
+                const message =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                message.className =
+                    "message";
+
+
+                message.textContent =
+                    item.message;
+
+
+                element.appendChild(
+                    name
+                );
+
+
+                element.appendChild(
+                    message
+                );
+
+
+                listElement.appendChild(
+                    element
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "LOAD ERROR:",
+            error
+        );
+
+
+        listElement.innerHTML = `
+            <div class="empty">
+                Lỗi:
+                ${escapeHtml(
+                    error.message
+                )}
+            </div>
+        `;
+
+    }
+
 }
 
 
@@ -53,42 +215,53 @@ async function addMessage() {
     const name =
         nameInput.value.trim();
 
+
     const message =
         messageInput.value.trim();
 
 
-    // Kiểm tra tên
+    // ------------------------------
+    // Kiểm tra
+    // ------------------------------
 
     if (!name) {
 
-        alert("Vui lòng nhập tên");
+        alert(
+            "Vui lòng nhập tên"
+        );
 
         nameInput.focus();
 
         return;
+
     }
 
 
-    // Kiểm tra lời chúc
-
     if (!message) {
 
-        alert("Vui lòng nhập lời chúc");
+        alert(
+            "Vui lòng nhập lời chúc"
+        );
 
         messageInput.focus();
 
         return;
+
     }
 
 
     try {
 
+        // ---------------------------
         // Khóa nút
+        // ---------------------------
 
-        addButton.disabled = true;
+        addButton.disabled =
+            true;
+
 
         addButton.textContent =
-            "Đang thêm...";
+            "Đang lưu...";
 
 
         showStatus(
@@ -96,24 +269,36 @@ async function addMessage() {
         );
 
 
+        // ---------------------------
+        // Gửi API
+        // ---------------------------
+
         const response =
             await fetch(
-                API.ADD,
+                "/api/data",
                 {
-                    method: "POST",
+
+                    method:
+                        "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                        name: name,
+                            name:
+                                name,
 
-                        message: message
+                            message:
+                                message
 
-                    })
+                        })
+
                 }
             );
 
@@ -122,37 +307,53 @@ async function addMessage() {
             await response.json();
 
 
+        // ---------------------------
+        // Kiểm tra kết quả
+        // ---------------------------
+
         if (!response.ok) {
 
             throw new Error(
                 result.message ||
                 "Không thể thêm dữ liệu"
             );
+
         }
 
 
+        // ---------------------------
         // Thành công
+        // ---------------------------
 
         showStatus(
             "Thêm lời chúc thành công!"
         );
 
 
+        // ---------------------------
         // Xóa form
+        // ---------------------------
 
-        nameInput.value = "";
+        nameInput.value =
+            "";
 
-        messageInput.value = "";
+        messageInput.value =
+            "";
 
 
+        // ---------------------------
         // Load lại danh sách
+        // ---------------------------
 
         await loadMessages();
 
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "ADD ERROR:",
+            error
+        );
 
 
         showStatus(
@@ -163,205 +364,25 @@ async function addMessage() {
 
     } finally {
 
-        addButton.disabled = false;
+        addButton.disabled =
+            false;
+
 
         addButton.textContent =
             "Thêm lời chúc";
-    }
-}
 
-
-// ========================================
-// LẤY DANH SÁCH
-// ========================================
-
-async function loadMessages() {
-
-    listElement.innerHTML =
-        "Đang tải...";
-
-
-    try {
-
-        const response =
-            await fetch(
-                API.LIST
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.message ||
-                "Không thể lấy danh sách"
-            );
-        }
-
-
-        const blobs =
-            result.blobs || [];
-
-
-        // Không có dữ liệu
-
-        if (blobs.length === 0) {
-
-            listElement.innerHTML = `
-                <div class="empty">
-                    Chưa có lời chúc nào.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        listElement.innerHTML = "";
-
-
-        // Đọc từng Blob
-
-        for (const blob of blobs) {
-
-            try {
-
-                const data =
-                    await readBlob(
-                        blob.pathname
-                    );
-
-
-                createMessageElement(
-                    data
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Không thể đọc:",
-                    blob.pathname,
-                    error
-                );
-
-            }
-
-        }
-
-
-        // Nếu không đọc được dữ liệu
-
-        if (!listElement.children.length) {
-
-            listElement.innerHTML = `
-                <div class="empty">
-                    Không thể đọc dữ liệu.
-                </div>
-            `;
-        }
-
-
-    } catch (error) {
-
-        console.error(error);
-
-
-        listElement.innerHTML = `
-            <div class="empty">
-                Lỗi:
-                ${escapeHtml(
-                    error.message
-                )}
-            </div>
-        `;
-    }
-}
-
-
-// ========================================
-// ĐỌC MỘT BLOB
-// ========================================
-
-async function readBlob(name) {
-
-    const response =
-        await fetch(
-            "/api/read?name=" +
-            encodeURIComponent(name)
-        );
-
-
-    const result =
-        await response.json();
-
-
-    if (!response.ok) {
-
-        throw new Error(
-            result.message ||
-            "Không thể đọc Blob"
-        );
     }
 
-
-    return result.data;
 }
 
 
 // ========================================
-// TẠO ELEMENT HIỂN THỊ
+// ESCAPE HTML
 // ========================================
 
-function createMessageElement(data) {
-
-    const item =
-        document.createElement("div");
-
-
-    item.className =
-        "item";
-
-
-    const name =
-        document.createElement("div");
-
-    name.className =
-        "name";
-
-
-    name.textContent =
-        data.name || "";
-
-
-    const message =
-        document.createElement("div");
-
-    message.className =
-        "message";
-
-
-    message.textContent =
-        data.message || "";
-
-
-    item.appendChild(name);
-
-    item.appendChild(message);
-
-
-    listElement.appendChild(item);
-}
-
-
-// ========================================
-// CHỐNG HTML INJECTION
-// ========================================
-
-function escapeHtml(value) {
+function escapeHtml(
+    value
+) {
 
     return String(value)
 
@@ -389,6 +410,7 @@ function escapeHtml(value) {
             "'",
             "&#039;"
         );
+
 }
 
 
