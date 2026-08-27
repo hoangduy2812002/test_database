@@ -4,15 +4,11 @@ import {
 } from "@vercel/blob";
 
 
-// ========================================
-// TÊN FILE DUY NHẤT TRONG BLOB
-// ========================================
-
 const FILE_NAME = "messages.json";
 
 
 // ========================================
-// ĐỌC FILE messages.json
+// ĐỌC messages.json
 // ========================================
 
 async function getData() {
@@ -64,15 +60,9 @@ async function getData() {
 
     } catch (error) {
 
-        /*
-         * Nếu messages.json chưa tồn tại
-         * thì coi như database đang rỗng.
-         */
-
         console.log(
-            "Chưa có messages.json"
+            "Không có messages.json, tạo mới."
         );
-
 
         return [];
 
@@ -82,7 +72,7 @@ async function getData() {
 
 
 // ========================================
-// GHI LẠI FILE messages.json
+// LƯU messages.json
 // ========================================
 
 async function saveData(data) {
@@ -102,7 +92,11 @@ async function saveData(data) {
                 access: "private",
 
                 contentType:
-                    "application/json"
+                    "application/json",
+
+                // Cho phép ghi đè file
+                allowOverwrite:
+                    true
             }
 
         );
@@ -128,7 +122,9 @@ export default async function handler(
         // GET
         // =================================
 
-        if (req.method === "GET") {
+        if (
+            req.method === "GET"
+        ) {
 
             const data =
                 await getData();
@@ -138,7 +134,8 @@ export default async function handler(
 
                 success: true,
 
-                data: data
+                data:
+                    data
 
             });
 
@@ -149,16 +146,19 @@ export default async function handler(
         // POST
         // =================================
 
-        if (req.method === "POST") {
+        if (
+            req.method === "POST"
+        ) {
 
             const {
                 name,
                 message
-            } = req.body || {};
+            } =
+                req.body || {};
 
 
             // -----------------------------
-            // Kiểm tra dữ liệu
+            // Kiểm tra name
             // -----------------------------
 
             if (
@@ -178,6 +178,10 @@ export default async function handler(
             }
 
 
+            // -----------------------------
+            // Kiểm tra message
+            // -----------------------------
+
             if (
                 typeof message !== "string" ||
                 !message.trim()
@@ -196,7 +200,7 @@ export default async function handler(
 
 
             // -----------------------------
-            // Đọc dữ liệu cũ
+            // Lấy dữ liệu cũ
             // -----------------------------
 
             const data =
@@ -204,7 +208,7 @@ export default async function handler(
 
 
             // -----------------------------
-            // Thêm dữ liệu mới
+            // Thêm dữ liệu
             // -----------------------------
 
             const newData = {
@@ -224,7 +228,7 @@ export default async function handler(
 
 
             // -----------------------------
-            // Lưu lại Blob
+            // Lưu lại
             // -----------------------------
 
             await saveData(
