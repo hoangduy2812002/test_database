@@ -1,4 +1,4 @@
-import { list } from "@vercel/blob";
+import { get } from "@vercel/blob";
 
 export default async function handler(req, res) {
 
@@ -14,8 +14,7 @@ export default async function handler(req, res) {
         }
 
 
-        const name =
-            req.query.name;
+        const name = req.query.name;
 
 
         if (!name) {
@@ -28,48 +27,32 @@ export default async function handler(req, res) {
         }
 
 
-        const result =
-            await list();
+        // Đọc Blob Private
+        const result = await get(name, {
+            access: "private"
+        });
 
 
-        const blob =
-            result.blobs.find(
-                item =>
-                    item.pathname === name
-            );
-
-
-        if (!blob) {
+        if (!result) {
 
             return res.status(404).json({
-
                 success: false,
-
-                message:
-                    "Không tìm thấy dữ liệu"
-
+                message: "Không tìm thấy Blob"
             });
 
         }
 
 
-        const response =
-            await fetch(
-                blob.downloadUrl
-            );
+        // Đọc nội dung Blob
+        const text =
+            await new Response(
+                result.stream
+            ).text();
 
 
-        if (!response.ok) {
-
-            throw new Error(
-                `Không thể đọc Blob: ${response.status}`
-            );
-
-        }
-
-
+        // Chuyển JSON thành object
         const data =
-            await response.json();
+            JSON.parse(text);
 
 
         return res.status(200).json({
@@ -93,8 +76,7 @@ export default async function handler(req, res) {
 
             success: false,
 
-            message:
-                error.message
+            message: error.message
 
         });
 
